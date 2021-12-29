@@ -1,0 +1,39 @@
+- name: Test Playbook
+  hosts: all
+  become: True
+  tasks:
+    - name: Test Task
+      command: "hostname"
+
+    - name: "Update apt-get repo and cache"
+      apt: update_cache=yes force_apt_get=yes
+
+    - name: "Upgrade all apt packages"
+      apt: upgrade=dist force_apt_get=yes
+
+    - name: "Apt Packages"
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - git
+        - vim
+        - ca-certificates
+        - curl
+        - gnupg
+        - lsb-release
+
+    - name: "Install Docker GPG key"
+      command: "curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg"
+    
+    - name: "Set up Docker stable repo"
+      command: 'echo \ "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \ $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null'
+    
+    - name: "Install Docker Engine"
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
